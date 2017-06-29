@@ -53,20 +53,37 @@
 <body>
     <ul id="messages"></ul>
     <form action="">
-        <input id="m" autocomplete="off" /><button>Send</button>
+        <input id="m" autocomplete="off" />
+        <button id="btnSend">Send</button>
+        <button id="btnConnect">Connect</button>
+        <button id="btnDisconnect">Disconnect</button>
     </form>
-    <script src="https://cdn.jsdelivr.net/socket.io-client/1.1.0/socket.io.js"></script>
+    <script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
     $(function () {
-        var socket = io();
-        $('form').submit(function () {
+        var socket = io('http://localhost:3000');
+        $('button#btnSend').click(function () {
             socket.emit('hi', $('#m').val());
             $('#m').val('');
             return false;
         });
+        $('button#btnConnect').click(function () {
+            socket.open();
+            return false;
+        });
+        $('button#btnDisconnect').click(function () {
+            socket.close();
+            return false;
+        });
         socket.on('hi', function (msg) {
             $('#messages').append($('<li>').text(msg));
+        });
+        socket.on('connect', () => {
+            $('#messages').append($('<li>').text('Client socket connected ' + socket.id));
+        });
+        socket.on('disconnect', () => {
+            $('#messages').append($('<li>').text('Client socket disconnected ' + socket.id));
         });
     });
     </script>

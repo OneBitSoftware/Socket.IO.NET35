@@ -1,9 +1,9 @@
 ﻿var app = require('express')();
 var http = require('http').Server(app);
-var socket = require('socket.io')(http, {
+var io = require('socket.io')(http, {
     pingInterval: 5000,
-    transports: ["websocket"],
-    upgrade: false
+    //transports: ["websocket"],
+    //upgrade: false
 });
 var expect = require('expect.js');
 var test_data = require('./test_data.json');
@@ -12,19 +12,25 @@ app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 });
 
-socket.on('connection', function (socket) {
+io.on('connection', function (socket) {
     console.log('connected... ' + socket.id);
 
     socket.on('hi', function (msg) {
         console.log('Received hi emit data: ' + msg);
-        socket.emit('hi', msg);
+        io.sockets.emit('hi', msg);
     });
-
 
     socket.on('disconnect', function (socket) {
         console.log('Got disconnected...' + socket);
     });
 
+    socket.on('connect', function (socket) { // does nothing
+        console.log('socket connected:' + socket);
+    });
+
+    socket.on('reconnect', function (socket) {
+        console.log('socket reconnected:' + socket);
+    });
 
     //ogs test
     socket.on('parser_error#21', function (d) {
@@ -167,23 +173,23 @@ socket.on('connection', function (socket) {
 
 });
 
-socket.of('/timeout_socket').on('connection', function () {
+io.of('/timeout_socket').on('connection', function () {
     // register namespace
 });
 
-socket.of('/foo').on('connection', function () {
+io.of('/foo').on('connection', function () {
     // register namespace
 });
 
-socket.of('/timeout_socket').on('connection', function () {
+io.of('/timeout_socket').on('connection', function () {
     // register namespace
 });
 
-socket.of('/valid').on('connection', function () {
+io.of('/valid').on('connection', function () {
     // register namespace
 });
 
-socket.of('/asd').on('connection', function () {
+io.of('/asd').on('connection', function () {
     // register namespace
 });
 
