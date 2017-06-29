@@ -80,6 +80,52 @@ namespace Integration
         }
 
         [Fact]
+        public void ConnectDisconnectConnect_ShouldReturnCorrectEvents()
+        {
+            var log = LogManager.GetLogger(GlobalHelper.CallerName());
+            log.Info("Start ConnectDisconnectConnect_ShouldReturnCorrectEvents");
+            ManualResetEvent = new ManualResetEvent(false);
+            var connectCount = 0; 
+            var disconnectCount = 0; 
+
+            var options = CreateOptions();
+            var uri = CreateUri();
+            socket = SOCKETNET35.IO.Socket(ServerUrl, new IO.Options() { AutoConnect = false });
+
+            socket.On(SOCKETNET35.Socket.EVENT_CONNECT, () =>
+            {
+                connectCount++;
+                log.Info("EVENT_CONNECT");
+                socket.Disconnect();
+            });
+
+            socket.On(SOCKETNET35.Socket.EVENT_DISCONNECT,
+                (data) =>
+                {
+                    disconnectCount++;
+                    log.Info("EVENT_DISCONNECT");
+                    Message = (string)data;
+
+                    if (connectCount < 2)
+                    {
+                        log.Info("Connecting count: " + connectCount);
+                        socket.Connect();
+                    }
+                    else
+                    {
+                        ManualResetEvent.Set();
+                    }
+                });
+
+            socket.Connect();
+            ManualResetEvent.WaitOne(65000);
+            Assert.Equal(2, connectCount);
+            Assert.Equal(2, disconnectCount);
+            socket.Close();
+            Assert.Equal("io client disconnect", this.Message);
+        }
+
+        [Fact]
         public void MessageTest()
         {
             //var log = LogManager.GetLogger(GlobalHelper.CallerName());

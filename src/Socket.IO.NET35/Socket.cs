@@ -40,7 +40,7 @@ namespace Socket.IO.NET35
             EVENT_RECONNECTING
         };
 
-        private bool Connected;
+        public bool Connected;
         //private bool Disconnected = true;
         private int Ids;
         private string Nsp;
@@ -63,12 +63,18 @@ namespace Socket.IO.NET35
         {
             Manager io = _io;
             Subs = new ConcurrentQueue<On.IHandle>();
-
+            
             Subs.Enqueue(SOCKETNET35.On.Create(io, Manager.EVENT_OPEN, new ListenerImpl(OnOpen)));
-            Subs.Enqueue(SOCKETNET35.On.Create(io, Manager.EVENT_PACKET, new ListenerImpl((data) => OnPacket((Packet)data))));
+            Subs.Enqueue(SOCKETNET35.On.Create(io, Manager.EVENT_PACKET, new ListenerImpl((data) => {
+                OnPacket((Packet)data);
+            })));
             Subs.Enqueue(SOCKETNET35.On.Create(io, Manager.EVENT_CLOSE, new ListenerImpl((data) => OnClose((string)data))));
-        }
 
+
+            Subs.Enqueue(SOCKETNET35.On.Create(io, Manager.EVENT_CONNECT, new ListenerImpl((s) => {
+
+            })));
+        }
 
         public Socket Open()
         {
@@ -86,6 +92,14 @@ namespace Socket.IO.NET35
             //CancellationToken.None,
             //TaskCreationOptions.None,
             //TaskScheduler.Default);
+
+
+            if (Subs.Count == 0)
+            {
+                // Registers the "sub" events if they are not
+                // used in a Connect-Disconnect-Connect cycle
+                SubEvents();
+            }
 
             var task = new TaskWorker(null);
             task.QueueWorker(
@@ -210,6 +224,8 @@ namespace Socket.IO.NET35
         private void OnOpen()
         {
             var log = LogManager.GetLogger(GlobalHelper.CallerName());
+            log.Info(string.Format("Socket OnOpen {0}", Nsp));
+
             if (Nsp != "/")
             {
                 PacketProcess(new Packet(Parser.CONNECT));
@@ -226,6 +242,9 @@ namespace Socket.IO.NET35
 
         private void OnPacket(Packet packet)
         {
+            var log = LogManager.GetLogger(GlobalHelper.CallerName());
+            log.Info(string.Format("Packet data: {0} {1} {2}", packet.Id, packet.Type, packet.Data.ToString()));
+
             if (Nsp != packet.Nsp)
             {
                 return;
@@ -338,8 +357,6 @@ namespace Socket.IO.NET35
 
             fn.Call(args.ToArray());
         }
-
-
 
         private void OnConnect()
         {
