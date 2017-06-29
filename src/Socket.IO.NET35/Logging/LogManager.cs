@@ -69,11 +69,12 @@ namespace Socket.IO.NET35.Logging
             }
 
             msg = GlobalHelper.StripInvalidUnicodeCharacters(msg);
-            var msg1 = string.Format("{0} [{3}] {1} - {2}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff"), MyType,
+            var msg1 = string.Format("{0} [{3}] {1} - {2}", 
+                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff"), 
+                MyType,
                 msg,
                 System.Threading.Thread.CurrentThread.ManagedThreadId);
             LogManager.file.WriteLine(msg1);
-
         }
 
         [Conditional("DEBUG")]

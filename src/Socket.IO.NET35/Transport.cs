@@ -86,6 +86,10 @@ namespace Socket.IO.NET35
         {
             Exception err = new SocketEngineException(message, exception);
             this.Emit(EVENT_ERROR, err);
+
+            var log = LogManager.GetLogger(GlobalHelper.CallerName());
+            log.Info("Transport Error: " + exception.ToString());
+
             return this;
         }
 
@@ -126,7 +130,6 @@ namespace Socket.IO.NET35
             this.Emit(EVENT_PACKET, packet);
         }
 
-
         public Transport Open()
         {
             if (ReadyState == ReadyStateEnum.CLOSED)
@@ -161,20 +164,17 @@ namespace Socket.IO.NET35
             }
             else
             {
+                log.Info("Transport not open, throwing exception.");
                 throw new SocketEngineException("Transport not open");
-                log.Info("Transport not open");
             }
             return this;
         }
-
-
 
         protected abstract void DoOpen();
 
         protected abstract void DoClose();
 
         protected abstract void Write(List<EnginePacket> packets);
-
 
         public class Options
         {

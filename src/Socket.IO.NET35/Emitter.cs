@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Socket.IO.NET35.Logging;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,6 @@ namespace Socket.IO.NET35
 
         private ConcurrentDictionary<IListener, IListener> _onceCallbacks;
 
-
         public Emitter()
         {
             this.Off();
@@ -30,8 +30,8 @@ namespace Socket.IO.NET35
         /// <returns>a reference to this object.</returns>
         public virtual Emitter Emit(string eventString, params object[] args)
         {
-            //var log = LogManager.GetLogger(Global.CallerName());
-            //log.Info("Emitter emit event = " + eventString);
+            var log = LogManager.GetLogger(GlobalHelper.CallerName());
+            log.Info("Emitter emit event = " + eventString);
             if (this.callbacks.ContainsKey(eventString))
             {
                 List<IListener> callbacksLocal = this.callbacks[eventString];
@@ -42,6 +42,11 @@ namespace Socket.IO.NET35
                     fn.Call(args);
                 }
             }
+            else
+            {
+                log.Info("Emitter did not emit event = " + eventString);
+            }
+
             return this;
         }
 
@@ -144,8 +149,8 @@ namespace Socket.IO.NET35
                 List<IListener> retrievedValue;
                 if (!callbacks.TryGetValue(eventString, out retrievedValue))
                 {
-                    //var log = LogManager.GetLogger(Global.CallerName());
-                    //log.Info(string.Format("Emitter.Off Could not remove {0}", eventString));
+                    var log = LogManager.GetLogger(GlobalHelper.CallerName());
+                    log.Info(string.Format("Emitter.Off Could not remove {0}", eventString));
                 }
 
                 if (retrievedValue != null)
@@ -229,7 +234,6 @@ namespace Socket.IO.NET35
         {
             return this.Listeners(eventString).Count > 0;
         }
-
     }
 
     public interface IListener : System.IComparable<IListener>
@@ -242,33 +246,35 @@ namespace Socket.IO.NET35
     {
         private static int id_counter = 0;
         private int Id;
-        private readonly Action fn1;
-        private readonly Action<object> fn;
+        private readonly Action functionWithoutParameters;
+        private readonly Action<object> functionWithParameters;
 
         public ListenerImpl(Action<object> fn)
         {
 
-            this.fn = fn;
+            this.functionWithParameters = fn;
             this.Id = id_counter++;
         }
 
         public ListenerImpl(Action fn)
         {
 
-            this.fn1 = fn;
+            this.functionWithoutParameters = fn;
             this.Id = id_counter++;
         }
 
         public void Call(params object[] args)
         {
-            if (fn != null)
+            if (functionWithParameters != null)
             {
                 var arg = args.Length > 0 ? args[0] : null;
-                fn(arg);
+                var ttt = functionWithParameters.Method.ToString();
+                functionWithParameters(arg);
             }
             else
             {
-                fn1(); //this invokes the function
+                var ttt = functionWithoutParameters.Method.ToString();
+                functionWithoutParameters(); //this invokes the function
             }
         }
 
@@ -317,6 +323,4 @@ namespace Socket.IO.NET35
             return Id;
         }
     }
-
-
 }

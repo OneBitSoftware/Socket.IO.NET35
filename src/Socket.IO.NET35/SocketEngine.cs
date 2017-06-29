@@ -477,7 +477,6 @@ namespace Socket.IO.NET35
         {
             var log = LogManager.GetLogger(GlobalHelper.CallerName());
 
-
             if (ReadyState == ReadyStateEnum.OPENING || ReadyState == ReadyStateEnum.OPEN)
             {
                 log.Info(string.Format("socket received: type '{0}', data '{1}'", packet.Type, packet.Data));
@@ -488,7 +487,6 @@ namespace Socket.IO.NET35
                 if (packet.Type == EnginePacket.OPEN)
                 {
                     OnHandshake(new HandshakeData((string)packet.Data));
-
                 }
                 else if (packet.Type == EnginePacket.PONG)
                 {
@@ -510,7 +508,6 @@ namespace Socket.IO.NET35
             {
                 log.Info(string.Format("OnPacket packet received with socket readyState '{0}'", ReadyState));
             }
-
         }
 
         private void OnHandshake(HandshakeData handshakeData)
@@ -524,6 +521,7 @@ namespace Socket.IO.NET35
             PingInterval = handshakeData.PingInterval;
             PingTimeout = handshakeData.PingTimeout;
             OnOpen();
+
             // In case open handler closes socket
             if (ReadyStateEnum.CLOSED == this.ReadyState)
             {
@@ -533,7 +531,6 @@ namespace Socket.IO.NET35
 
             this.Off(EVENT_HEARTBEAT, new OnHeartbeatAsListener(this));
             this.On(EVENT_HEARTBEAT, new OnHeartbeatAsListener(this));
-
         }
 
         private class OnHeartbeatAsListener : IListener
@@ -560,8 +557,6 @@ namespace Socket.IO.NET35
                 return 0;
             }
         }
-
-
 
         private void SetPing()
         {
@@ -644,7 +639,6 @@ namespace Socket.IO.NET35
             Flush();
         }
 
-
         private void OnOpen()
         {
             var log = LogManager.GetLogger(GlobalHelper.CallerName());
@@ -655,7 +649,6 @@ namespace Socket.IO.NET35
 
             Flush();
             Emit(EVENT_OPEN);
-
 
             if (ReadyState == ReadyStateEnum.OPEN && Upgrade && Transport is Polling)
             //if (ReadyState == ReadyStateEnum.OPEN && Upgrade && this.Transport)
@@ -1098,7 +1091,6 @@ namespace Socket.IO.NET35
                     PrevBufferLen = 0;
                 }, 1);
 
-
                 if (this.Transport != null)
                 {
                     // stop event from firing again for transport
@@ -1136,8 +1128,6 @@ namespace Socket.IO.NET35
             }
             return filterUpgrades;
         }
-
-
 
         internal void OnHeartbeat(long timeout)
         {

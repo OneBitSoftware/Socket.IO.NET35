@@ -47,7 +47,7 @@ namespace Socket.IO.NET35
         private long _reconnectionDelay;
         private long _reconnectionDelayMax;
         private long _timeout;
-        private int Connected;
+        public int Connected;
         private int Attempts;
         private Uri Uri;
         private List<Packet> PacketBuffer;
@@ -315,6 +315,7 @@ namespace Socket.IO.NET35
 
             var sub = SOCKETNET35.On.Create(socket, EVENT_DATA, new ListenerImpl((data) =>
             {
+                log.Info("Manager.OnOpen EVENT_DATA " + data);
                 if (data is string)
                 {
                     OnData((string)data);
@@ -324,6 +325,7 @@ namespace Socket.IO.NET35
                     Ondata((byte[])data);
                 }
             }));
+
             lock (Subs)
             {
                 Subs.Enqueue(sub);
@@ -333,6 +335,7 @@ namespace Socket.IO.NET35
             {
                 OnDecoded((Packet)data);
             }));
+
             lock (Subs)
             {
                 Subs.Enqueue(sub);
@@ -342,6 +345,7 @@ namespace Socket.IO.NET35
             {
                 OnError((Exception)data);
             }));
+
             lock (Subs)
             {
                 Subs.Enqueue(sub);
@@ -356,8 +360,6 @@ namespace Socket.IO.NET35
             {
                 Subs.Enqueue(sub);
             }
-
-
         }
 
         private void OnData(string data)

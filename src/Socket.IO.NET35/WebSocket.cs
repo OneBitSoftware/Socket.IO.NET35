@@ -119,7 +119,7 @@ namespace Socket.IO.NET35
 
             public void Call(object data)
             {
-                //var log = LogManager.GetLogger(Global.CallerName());
+                var log = LogManager.GetLogger(GlobalHelper.CallerName());
 
                 if (data is string)
                 {
@@ -129,28 +129,25 @@ namespace Socket.IO.NET35
                 {
                     var d = (byte[])data;
 
-                    //try
-                    //{
-                    //    var dataString = BitConverter.ToString(d);
-                    //    //log.Info(string.Format("WriteEncodeCallback byte[] data {0}", dataString));
-                    //}
-                    //catch (Exception e)
-                    //{
-                    //    log.Error(e);
-                    //}
+                    try
+                    {
+                        var dataString = BitConverter.ToString(d);
+                        log.Info(string.Format("WriteEncodeCallback byte[] data {0}", dataString));
+                    }
+                    catch (Exception e)
+                    {
+                        log.Error(e);
+                    }
 
                     webSocket.ws.Send(d, 0, d.Length);
                 }
             }
         }
 
-
-
         protected override void DoClose()
         {
             if (ws != null)
             {
-
                 try
                 {
                     ws.Close();
@@ -162,8 +159,6 @@ namespace Socket.IO.NET35
                 }
             }
         }
-
-
 
         public string Uri()
         {
