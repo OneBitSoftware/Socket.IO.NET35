@@ -4,13 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Socket.IO.NET35.Tasks;
+using System.ComponentModel;
 
 namespace Console
 {
     class Program
     {
         private static SOCKETNET35.Socket _mainSocket { get; set; }
-        static Queue<TaskWorker> workerQueue = new Queue<TaskWorker>();
+        static Queue<TaskWorker> _workerQueue = new Queue<TaskWorker>();
+        static bool _runWorkers = true;
+        static int _workerId = 0;
 
         static void Main(string[] args)
         {
@@ -18,10 +21,22 @@ namespace Console
 
             ConnectToSocket();
             //TestTimer();
+            //ManualEmit();
 
-            System.Console.WriteLine("Done.");
+            RunLoad();
 
-            while(true)
+            System.Console.WriteLine("Running....");
+            System.Console.ReadKey();
+        }
+
+        private static void RunLoad()
+        {
+            CreateWorkers(5);
+        }
+
+        private static void ManualEmit()
+        {
+            while (true)
             {
                 var key = System.Console.ReadKey();
 
@@ -36,17 +51,25 @@ namespace Console
             }
         }
 
-        private static void TestTimer()
+        private static void SpawnWorker(string i)
         {
             var task = new TaskWorker(null);
             task.QueueWorker(
-                workerQueue,
+                _workerQueue,
                 null,
                 (x, e) =>
                 {
                     //// some custom do work logic.
-                    System.Threading.Thread.Sleep(4000);
-                    System.Console.WriteLine("wait task completed.");
+                    while (_runWorkers)
+                    {
+                        var dataString = task.Id + " Key " + DateTime.Now.Ticks.ToString();
+
+                        _mainSocket.Emit("hi", dataString);
+
+                        System.Console.WriteLine("Emitted " + dataString);
+
+                        System.Threading.Thread.Sleep(50);
+                    }
                 },
                 (x, e) =>
                 {
@@ -59,15 +82,15 @@ namespace Console
                 (x, e) =>
                 {
                     //// Progress change logic.
-                    var p = e.ProgressPercentage;
-                    var s = e.UserState.ToString();
                 });
+        }
 
-            //System.Threading.Thread.Sleep(4000);
-
-            task.CancelAll(workerQueue);
-            System.Console.WriteLine("Overall task completed.");
-
+        private static void CreateWorkers(int workerCount)
+        {
+            for (int i = 0; i < workerCount; i++)
+            {
+                SpawnWorker(i.ToString());
+            }
         }
 
         private static void ConnectToSocket()
