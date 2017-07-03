@@ -7,17 +7,20 @@ namespace Socket.IO.NET35.Tasks
 {
     public class TaskWorker : BackgroundWorker
     {
+        public Guid Id { get; set; }
         //public bool CancelAll { get; set; }
         public CancellationTokenSource CancellationTokenSource
         {
             get;
             private set;
         }
+
         public TaskWorker(object sender)
         {
             this.Sender = sender;
             this.WorkerSupportsCancellation = true;
             CancellationTokenSource = new CancellationTokenSource();
+            Id = Guid.NewGuid();
         }
 
         public object Sender { get; private set; }
