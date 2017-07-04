@@ -1,15 +1,18 @@
 ﻿var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http, {
-    pingInterval: 5000,
+    pingInterval: 5000
     //transports: ["websocket"],
     //upgrade: false
 });
 var expect = require('expect.js');
 var test_data = require('./test_data.json');
+var singleSessionId = 'test';
+var sessionRandomData = 'test';
+var port = process.env.PORT || 3000; 
 
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/index.html');
+    return "Hello Socket.IO World!";
 });
 
 io.on('connection', function (socket) {
@@ -171,7 +174,23 @@ io.on('connection', function (socket) {
         socket.emit('hi', 'more data');
     });
 
+
+    socket.on('createSession', function (sessionId, randomData) {
+        console.log('Session created. Id: ' + sessionId + ' Data: ' + randomData);
+        storeData(randomData);
+        socket.emit('createdSession', getData() );
+    });
 });
+
+function storeData(data)
+{
+    sessionRandomData = data;
+}
+
+function getData()
+{
+    return sessionRandomData;
+}
 
 io.of('/timeout_socket').on('connection', function () {
     // register namespace
@@ -193,6 +212,6 @@ io.of('/asd').on('connection', function () {
     // register namespace
 });
 
-http.listen(3000, function () {
-    console.log('listening on *:3000');
+http.listen(port, function () {
+    console.log('listening on http *:' + port);
 });

@@ -1,4 +1,4 @@
-﻿using SOCKETNET35=Socket.IO.NET35;
+﻿using SOCKETNET35 = Socket.IO.NET35;
 using Socket.IO.NET35.Logging;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Integration
 {
-    public class ConnectionTests  : BaseIntegrationTest
+    public class ConnectionTests : BaseIntegrationTest
     {
         private ManualResetEvent ManualResetEvent = null;
         private SOCKETNET35.Socket socket;
@@ -85,8 +85,8 @@ namespace Integration
             var log = LogManager.GetLogger(GlobalHelper.CallerName());
             log.Info("Start ConnectDisconnectConnect_ShouldReturnCorrectEvents");
             ManualResetEvent = new ManualResetEvent(false);
-            var connectCount = 0; 
-            var disconnectCount = 0; 
+            var connectCount = 0;
+            var disconnectCount = 0;
 
             var options = CreateOptions();
             var uri = CreateUri();
@@ -123,6 +123,40 @@ namespace Integration
             Assert.Equal(2, disconnectCount);
             socket.Close();
             Assert.Equal("io client disconnect", this.Message);
+        }
+
+        [Fact]
+        public void CreateSession_ShouldReturnCorrectSessionData()
+        {
+            // Arrange
+            var randomSessionData = DateTime.Now.Ticks.ToString() + Guid.NewGuid();
+            var sessionId = Guid.NewGuid();
+            var responseResult = string.Empty;
+            var options = CreateOptions();
+            var uri = CreateUri();
+            ManualResetEvent = new ManualResetEvent(false);
+
+            socket = SOCKETNET35.IO.Socket(ServerUrl);
+
+            socket.On(SOCKETNET35.Socket.EVENT_CONNECT, () =>
+            {
+                socket.Emit("createSession", sessionId, randomSessionData);
+            });
+
+            socket.On("createdSession", (responseData) =>
+            {
+                responseResult = responseData.ToString();
+                ManualResetEvent.Set();
+            });
+
+            // Act
+            ManualResetEvent.WaitOne(15000);
+            socket.Close();
+
+            // Assert
+            Assert.Equal(randomSessionData, responseResult);
+            Assert.NotEqual(string.Empty, responseResult);
+            Assert.NotEqual(" ", responseResult);
         }
 
         [Fact]
@@ -457,6 +491,7 @@ namespace Integration
             });
             var result = ManualResetEvent.WaitOne(15000);
             Assert.True(Flag);
+            socket.Close();
         }
 
 
@@ -700,8 +735,6 @@ namespace Integration
             Assert.Equal("1234", result);
 
         }
-
-
 
         [Fact]
         public void ShouldNotTryToReconnectAndShouldFormAConnectionWhenConnectingToCorrectPortWithDefaultTimeout()
@@ -1135,7 +1168,7 @@ namespace Integration
                 });
 
             //socket.Open();
-            ManualResetEvent.WaitOne(15000);
+            ManualResetEvent.WaitOne(160000);
             socket.Close();
             var obj = (string)events.Dequeue();
             Assert.Equal(100000, obj.Length);
