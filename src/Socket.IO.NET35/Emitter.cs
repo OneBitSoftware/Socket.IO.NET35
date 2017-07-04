@@ -268,12 +268,10 @@ namespace Socket.IO.NET35
             if (functionWithParameters != null)
             {
                 var arg = args.Length > 0 ? args[0] : null;
-                var ttt = functionWithParameters.Method.ToString();
                 functionWithParameters(arg);
             }
             else
             {
-                var ttt = functionWithoutParameters.Method.ToString();
                 functionWithoutParameters(); //this invokes the function
             }
         }
