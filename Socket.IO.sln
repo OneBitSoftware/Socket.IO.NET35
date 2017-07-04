@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.12
+VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EDFEF2C5-775C-4CA9-BC41-210E4B99D7BD}"
 EndProject
@@ -16,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test-server", "test-server"
 		test-server\index.html = test-server\index.html
 		test-server\index.js = test-server\index.js
 		test-server\package.json = test-server\package.json
+		test-server\test_data.json = test-server\test_data.json
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console", "tests\Console\Console.csproj", "{DA79442F-E005-4489-A06D-46E7E6F2E1EE}"
