@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Socket.IO.NET35
+﻿namespace Socket.IO.NET35
 {
+    using System;
+
     public class AckImpl : IAck
     {
         private readonly Action fn;
